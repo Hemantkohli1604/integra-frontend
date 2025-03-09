@@ -1,4 +1,4 @@
-import { BarChart2, DollarSign, Menu, Settings, ShoppingBag, ShoppingCart, TrendingUp, Users } from "lucide-react";
+import { BarChart2, Workflow, Menu, Activity, Settings, ShoppingBag, TestTubeDiagonal, TrendingUp, Users } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link } from "react-router-dom";
@@ -12,10 +12,10 @@ const SIDEBAR_ITEMS = [
 	},
 	{ name: "Api Design", icon: ShoppingBag, color: "#8B5CF6", href: "/api-design" },
 	{ name: "Policy Management", icon: Users, color: "#EC4899", href: "/policy-management" },
-	{ name: "Flows", icon: DollarSign, color: "#10B981", href: "/integration-flows" },
-	{ name: "TEST", icon: ShoppingCart, color: "#F59E0B", href: "/testing" },
+	{ name: "Flows", icon: Workflow, color: "#10B981", href: "/integration-flows" },
+	{ name: "TEST", icon: TestTubeDiagonal, color: "#F59E0B", href: "/testing" },
 	{ name: "Analytics", icon: TrendingUp, color: "#3B82F6", href: "/ai-assistance" },
-	{ name: "Monitoring", icon: Settings, color: "#6EE7B7", href: "/monitoring" },
+	{ name: "Monitoring", icon: Activity, color: "#6EE7B7", href: "/monitoring" },
     { name: "Settings", icon: Settings, color: "#6EE7B7", href: "/settings" },
 ];
 

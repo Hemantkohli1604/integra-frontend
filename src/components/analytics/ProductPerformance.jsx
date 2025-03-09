@@ -22,7 +22,7 @@ const ProductPerformance = () => {
 				<ResponsiveContainer>
 					<BarChart data={productPerformanceData}>
 						<CartesianGrid strokeDasharray='3 3' stroke='#374151' />
-						<XAxis dataKey='name' stroke='#9CA3AF' />
+						<XAxis dataKey='name' stroke='#9CA3AF'  />
 						<YAxis stroke='#9CA3AF' />
 						<Tooltip
 							contentStyle={{
