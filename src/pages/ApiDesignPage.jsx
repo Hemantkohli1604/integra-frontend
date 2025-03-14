@@ -1,41 +1,102 @@
-import { motion } from "framer-motion";
-
+import { useState, useEffect } from "react";
+import axios from "axios";
 import Header from "../components/common/Header";
-import StatCard from "../components/common/StatCard";
+import SwaggerPreview from '../components/apidesign/SwaggerPreview';
+import ApiForm from '../components/apidesign/ApiForm';
+import ApiList from '../components/apidesign/ApiList';
+import ManageIntegration from '../components/apidesign/ManageIntegration';
+import EditApiPage from '../components/apidesign/EditApiPage';
 
-import { AlertTriangle, DollarSign, Package, TrendingUp } from "lucide-react";
-import CategoryDistributionChart from "../components/overview/CategoryDistributionChart";
-import SalesTrendChart from "../components/products/SalesTrendChart";
-import ProductsTable from "../components/products/ProductsTable";
+const ApiDesignPage = () => {
+  const [openApiSpec, setOpenApiSpec] = useState(null);
+  const [apis, setApis] = useState([]);
+  const [isCreating, setIsCreating] = useState(false);
+  const [selectedIntegration, setSelectedIntegration] = useState(null);
+  const [editingIntegration, setEditingIntegration] = useState(null);
+  const [error, setError] = useState(null);
 
-const ProductsPage = () => {
-	return (
-		<div className='flex-1 overflow-auto relative z-10'>
-			<Header title='Products' />
+  useEffect(() => {
+    // Fetch existing apis from Cosmos DB
+    axios.get('http://localhost:3000/api/apispecs')
+      .then(response => {
+        if (Array.isArray(response.data)) {
+          setApis(response.data);
+        } else {
+          console.error('Unexpected response format:', response.data);
+          setError('Unexpected response format');
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching APIs:', error);
+        setError('Error fetching APIs');
+      });
+  }, []);
 
-			<main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
-				{/* STATS */}
-				<motion.div
-					className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8'
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 1 }}
-				>
-					<StatCard name='Total Products' icon={Package} value={1234} color='#6366F1' />
-					<StatCard name='Top Selling' icon={TrendingUp} value={89} color='#10B981' />
-					<StatCard name='Low Stock' icon={AlertTriangle} value={23} color='#F59E0B' />
-					<StatCard name='Total Revenue' icon={DollarSign} value={"$543,210"} color='#EF4444' />
-				</motion.div>
+  const handleDelete = (id) => {
+    axios.delete(`http://localhost:3000/api/apispecs/${id}`)
+      .then(() => setApis(apis.filter(integration => integration.id !== id)))
+      .catch(error => {
+        console.error('Error deleting integration:', error);
+        setError('Error deleting integration');
+      });
+  };
 
-				<ProductsTable />
+  const handleManage = (integration) => {
+    setSelectedIntegration(integration);
+    setOpenApiSpec(null); // Clear the Swagger preview when managing an integration
+  };
 
-				{/* CHARTS */}
-				<div className='grid grid-col-1 lg:grid-cols-2 gap-8'>
-					<SalesTrendChart />
-					<CategoryDistributionChart />
-				</div>
-			</main>
-		</div>
-	);
+  const handleEdit = (integration) => {
+    setEditingIntegration(integration);
+    setOpenApiSpec(null); // Clear the Swagger preview when editing an integration
+  };
+
+  return (
+    <div className='flex-1 overflow-auto relative z-10'>
+      <Header title='API Design' />
+
+      <main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
+        {!editingIntegration && (
+          <div className='mb-8'>
+            <button
+              className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'
+              onClick={() => setIsCreating(true)}
+            >
+              Create API
+            </button>
+          </div>
+        )}
+
+        {error && (
+          <div className='mb-8 text-red-600'>
+            {error}
+          </div>
+        )}
+
+        {isCreating && (
+          <ApiForm setIsCreating={setIsCreating} setApis={setApis} apis={apis} />
+        )}
+
+        {!isCreating && !selectedIntegration && !editingIntegration && (
+          <ApiList apis={apis} handleDelete={handleDelete} handleManage={handleManage} handleEdit={handleEdit} />
+        )}
+
+        {selectedIntegration && (
+          <ManageIntegration integration={selectedIntegration} setOpenApiSpec={setOpenApiSpec} />
+        )}
+
+        {editingIntegration && (
+          <EditApiPage integration={editingIntegration} setOpenApiSpec={setOpenApiSpec} />
+        )}
+
+        {!editingIntegration  && openApiSpec && (
+          <div className='mb-8'>
+            <SwaggerPreview spec={openApiSpec} />
+          </div>
+        )}
+      </main>
+    </div>
+  );
 };
-export default ProductsPage;
+
+export default ApiDesignPage;

@@ -1,59 +1,45 @@
-import { UserCheck, UserPlus, UsersIcon, UserX } from "lucide-react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useNavigate, Route, Routes } from 'react-router-dom';
+import Header from '../components/common/Header';
+import PolicyApiList from '../components/policydesign/PolicyApiList';
+import PolicyFlow from '../components/policydesign/PolicyFlow';
 
-import Header from "../components/common/Header";
-import StatCard from "../components/common/StatCard";
-import UsersTable from "../components/users/UsersTable";
-import UserGrowthChart from "../components/users/UserGrowthChart";
-import UserActivityHeatmap from "../components/users/UserActivityHeatmap";
-import UserDemographicsChart from "../components/users/UserDemographicsChart";
+const PolicyPage = () => {
+  const [apis, setApis] = useState([]);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
-const userStats = {
-	totalUsers: 152845,
-	newUsersToday: 243,
-	activeUsers: 98520,
-	churnRate: "2.4%",
+  useEffect(() => {
+    // Fetch the list of APIs from the backend
+    axios.get('http://localhost:3000/api/apispecs')
+      .then(response => {
+        setApis(response.data);
+      })
+      .catch(error => {
+        console.error('Error fetching APIs:', error);
+        setError('Error fetching APIs');
+      });
+  }, []);
+
+  return (
+    <div className='flex-1 overflow-auto relative z-10'>
+      <Header title='Policy Management' />
+      <main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
+        <button
+          className='inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 mb-4'
+          onClick={() => navigate(-1)}
+        >
+          Back
+        </button>
+        {error && <div className='text-red-600 mb-4'>{error}</div>}
+        <Routes>
+          <Route path="/" element={<PolicyApiList apis={apis} />} />
+          <Route path=":apiId" element={<PolicyFlow />} />
+        </Routes>
+      </main>
+    </div>
+  );
 };
 
-const UsersPage = () => {
-	return (
-		<div className='flex-1 overflow-auto relative z-10'>
-			<Header title='Users' />
-
-			<main className='max-w-7xl mx-auto py-6 px-4 lg:px-8'>
-				{/* STATS */}
-				<motion.div
-					className='grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8'
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 1 }}
-				>
-					<StatCard
-						name='Total Users'
-						icon={UsersIcon}
-						value={userStats.totalUsers.toLocaleString()}
-						color='#6366F1'
-					/>
-					<StatCard name='New Users Today' icon={UserPlus} value={userStats.newUsersToday} color='#10B981' />
-					<StatCard
-						name='Active Users'
-						icon={UserCheck}
-						value={userStats.activeUsers.toLocaleString()}
-						color='#F59E0B'
-					/>
-					<StatCard name='Churn Rate' icon={UserX} value={userStats.churnRate} color='#EF4444' />
-				</motion.div>
-
-				<UsersTable />
-
-				{/* USER CHARTS */}
-				<div className='grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8'>
-					<UserGrowthChart />
-					<UserActivityHeatmap />
-					<UserDemographicsChart />
-				</div>
-			</main>
-		</div>
-	);
-};
-export default UsersPage;
+export default PolicyPage;
